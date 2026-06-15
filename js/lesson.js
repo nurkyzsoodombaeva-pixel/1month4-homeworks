@@ -26,12 +26,6 @@
 //     };
 // }
 
-
-
-
-
-
-
 // const tabsParent = document.querySelector(".tab_content_items");
 // const tabBtns = document.querySelectorAll(".tab_content_item");
 // const tabBlocks = document.querySelectorAll(".tab_content_block");
@@ -71,20 +65,16 @@
 
 // slider();
 
-
-
 const tabsParent = document.querySelector(".tab_content_items");
 const tabBtns = document.querySelectorAll(".tab_content_item");
 const tabBlocks = document.querySelectorAll(".tab_content_block");
 
 const selectTab = (index = 0) => {
   tabBlocks.forEach((block, i) =>
-    block.classList.toggle("active", index === i)
+    block.classList.toggle("active", index === i),
   );
 
-  tabBtns.forEach((btn, i) =>
-    btn.classList.toggle("active", index === i)
-  );
+  tabBtns.forEach((btn, i) => btn.classList.toggle("active", index === i));
 };
 
 tabsParent.addEventListener("click", (event) => {
@@ -112,4 +102,118 @@ const slider = () => {
 };
 
 slider();
+
+const somInput = document.querySelector("#som");
+const usdInput = document.querySelector("#usd");
+const eurInput = document.querySelector("#eur");
+const errorText = document.querySelector("#error");
+
+// somInput.oninput = () => {
+//   const request = new XMLHttpRequest();
+//   request.open("GET", "../data/current.json");
+//   request.setRequestHeader("Content-type", "application/json");
+//   request.send();
+
+//   request.onload = () => {
+//     const {usd} = JSON.parse(request.response);
+//     usdInput.value = (somInput.value / usd).toFixed(2);
+// }
+
+const converter = (element, otherElement) => {
+  element.oninput = () => {
+    const request = new XMLHttpRequest();
+    request.open("GET", "../data/converter.json");
+    request.setRequestHeader("Content-type", "application/json");
+    request.send();
+
+    request.onload = () => {
+      const { usd, eur } = JSON.parse(request.response);
+      if (element.value == "") {
+        otherElements.forEach((input) => (input.value = ""));
+        return;
+      }
+
+      if (element.id === "som") {
+        usdInput.value = (element.value / usd).toFixed(2);
+        eurInput.value = (element.value / eur).toFixed(2);
+      } else if (element.id === "usd") {
+        somInput.value = (element.value * usd).toFixed(2);
+        eurInput.value = ((element.value * usd) / eur).toFixed(2); // Перевод USD -> SOM -> EUR
+      } else if (element.id === "eur") {
+        somInput.value = (element.value * eur).toFixed(2);
+        usdInput.value = ((element.value * eur) / usd).toFixed(2); // Перевод EUR -> SOM -> USD
+      }
+    };
+  };
+};
+
+converter(somInput, [usdInput, eurInput]);
+converter(usdInput, [somInput, eurInput]);
+converter(eurInput, [somInput, usdInput]);
+
+const btnNext = document.querySelector("#btn-next");
+const btnPrev = document.querySelector("#btn-prev");
+const cardTodo = document.querySelector(".card");
+
+let cardId = 1;
+const MAX = 200;
+
+btnNext.onclick = () => {
+  cardId++;
+  if (cardId > MAX) {
+    cardId = 1;
+  }
+  fetch(`https://jsonplaceholder.typicode.com/todos/${cardId}`)
+    .then((response) => response.json())
+    .then((data) => {
+      const { id, title, completed } = data;
+      const color = completed ? "green" : "red";
+      cardTodo.style.borderColor = color;
+      cardTodo.innerHTML = `
+    <p>${id}</p>
+    <p>${title}</p>
+    <p style='color: ${color}'>${completed ? "Complited" : "Not complited"}</p>`;
+    });
+};
+
+btnPrev.onclick = () => {
+  cardId--;
+  if (cardId < 1) {
+    cardId =  MAX;
+  }
+  fetch(`https://jsonplaceholder.typicode.com/todos/${cardId}`)
+    .then((response) => response.json())
+    .then((data) => {
+      const { id, title, completed } = data;
+      const color = completed ? "green" : "red";
+      cardTodo.style.borderColor = color;
+      cardTodo.innerHTML = `
+    <p>${id}</p>
+    <p>${title}</p>
+    <p style='color: ${color}'>${completed ? "Complited" : "Not complited"}</p>`;
+    });
+};
+
+fetch(`https://jsonplaceholder.typicode.com/todos/${cardId}`)
+  .then((response) => response.json())
+  .then((data) => {
+    const { id, title, completed } = data;
+    const color = completed ? "green" : "red";
+
+    cardTodo.style.borderColor = color;
+
+    cardTodo.innerHTML = `
+      <p>${id}</p>
+      <p>${title}</p>
+      <p style='color: ${color}'>
+        ${completed ? "Completed" : "Not completed"}
+      </p>`;
+  });
+  
+
+fetch("https://jsonplaceholder.typicode.com/posts")
+  .then(response => response.json())
+  .then((data) => {
+    console.log(data);
+  })
 
