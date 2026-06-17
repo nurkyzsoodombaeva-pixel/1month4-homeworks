@@ -179,7 +179,7 @@ btnNext.onclick = () => {
 btnPrev.onclick = () => {
   cardId--;
   if (cardId < 1) {
-    cardId =  MAX;
+    cardId = MAX;
   }
   fetch(`https://jsonplaceholder.typicode.com/todos/${cardId}`)
     .then((response) => response.json())
@@ -209,11 +209,42 @@ fetch(`https://jsonplaceholder.typicode.com/todos/${cardId}`)
         ${completed ? "Completed" : "Not completed"}
       </p>`;
   });
-  
 
 fetch("https://jsonplaceholder.typicode.com/posts")
-  .then(response => response.json())
+  .then((response) => response.json())
   .then((data) => {
     console.log(data);
-  })
+  });
 
+
+const cityInput = document.querySelector('.cityName')
+const searchBtn = document.querySelector('#search')
+const cityText = document.querySelector('.city')
+const tempText = document.querySelector('.temp')
+
+const BASE_API = 'https://api.openweathermap.org/data/2.5/weather';
+const API_KEY = '83b3ebd39b878f8be8acd104821aa61a';
+
+searchBtn.addEventListener('click', async () => {
+    const city = cityInput.value.trim();
+    if (city) {
+        try {
+            const response = await fetch(`${BASE_API}?q=${city}&units=metric&lang=ru&appid=${API_KEY}`);
+            if (!response.ok) {
+                throw new Error('Город не найден');
+            }
+            const data = await response.json();
+            const {name, main: {temp}} = data;
+            cityText.innerHTML = name;
+            tempText.innerHTML = `${Math.round(temp)}°C`;
+        } catch (error) {
+            console.error("Weather fetch error:", error);
+            cityText.innerHTML = 'Укажите правильный город';
+            tempText.innerHTML = '';
+        }
+    } else {
+        cityText.innerHTML = 'Укажите название города';
+        tempText.innerHTML = '';
+    }
+    cityInput.value = '';
+});
